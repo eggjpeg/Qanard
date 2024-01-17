@@ -29,6 +29,7 @@ FetchContent_Declare(xtensor
   GIT_REPOSITORY https://github.com/xtensor-stack/xtensor.git
   GIT_TAG        0.24.7
 )
+set(XTENSOR_USE_XSIMD ON CACHE BOOL "Enable SIMD acceleration.")
 FetchContent_MakeAvailable(xtensor)
 
 #===============================================================================
@@ -40,20 +41,16 @@ FetchContent_Declare(xtensor-blas
 )
 FetchContent_MakeAvailable(xtensor-blas)
 
+#===============================================================================
+# Find BLAS and LAPACK on the system
+find_package(BLAS REQUIRED)
+find_package(LAPACK REQUIRED)
 
 #===============================================================================
-
-# Get the Git hash for define
-execute_process(COMMAND git describe --dirty --always
-                WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-                OUTPUT_VARIABLE ABEILLE_GIT_HASH_RAW
-                OUTPUT_STRIP_TRAILING_WHITESPACE
-               )
-
 add_executable(qanard src/main.cpp)
 target_include_directories(qanard PRIVATE include)
 target_compile_features(qanard PRIVATE cxx_std_17)
-target_link_libraries(qanard PUBLIC xtl xsimd xtensor xtensor-blas)
+target_link_libraries(qanard PUBLIC xtl xsimd xtensor xtensor-blas BLAS::BLAS LAPACK::LAPACK)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC") # Compile options for Windows
   target_compile_options(qanard PRIVATE /W3)
